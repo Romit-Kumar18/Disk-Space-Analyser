@@ -57,9 +57,9 @@ def create_legend(ax, subdirectory_colors, file_sizes):
             subdirectory, _ = os.path.split(relative_path.replace('\\', '/'))  # Replace backslashes with forward slashes
             legend_patches.append(Patch(color=subdirectory_colors[subdirectory], label=f"{relative_path} - {file} ({convert_size(size)})"))
             count+=1
-        if count>40:
-            print("Legend truncated due to size limit.")
-            break
+        # if count>40:
+            # print("Legend truncated due to size limit.")
+            # break
     ax.legend(handles=legend_patches, loc='upper left', bbox_to_anchor=(1, 1), title="Legend", fontsize='small')
 
 def plot_treemap(file_sizes):
