@@ -2,20 +2,53 @@ import os
 import matplotlib.pyplot as plt
 import squarify
 import seaborn as sns
+import threading
 from collections import defaultdict
 from matplotlib.patches import Patch
 
-def get_file_sizes(directory):
-    file_sizes = defaultdict(list)
+def get_file_size(path):
+    return os.path.getsize(path)
 
-    for foldername, subfolders, filenames in os.walk(directory):
-        for filename in filenames:
-            filepath = os.path.join(foldername, filename)
-            relative_path = os.path.relpath(filepath, directory)
-            size = os.path.getsize(filepath)
-            file_sizes[relative_path].append((filename, size))
+def traverse_folder(root_path,path, result_dict):
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            size = get_file_size(file_path)
+            relative_path = os.path.relpath(file_path, root_path)
+            print(relative_path,file,size)
+            result_dict[relative_path].append((file,size))
 
-    return file_sizes
+def get_folder_sizes(path):
+    result_dict = defaultdict(list)
+
+    def worker(folder):
+        traverse_folder(path, folder, result_dict)
+
+    threads = []
+    for root, dirs, files in os.walk(path):
+        for dir in dirs:
+            folder_path = os.path.join(root, dir)
+            thread = threading.Thread(target=worker, args=(folder_path,))
+            threads.append(thread)
+            thread.start()
+
+    for thread in threads:
+        thread.join()
+    print(result_dict)
+    return result_dict
+
+# def get_file_sizes(directory):
+#     file_sizes = defaultdict(list)
+
+#     for foldername, subfolders, filenames in os.walk(directory):
+#         for filename in filenames:
+#             filepath = os.path.join(foldername, filename)
+#             relative_path = os.path.relpath(filepath, directory)
+#             size = os.path.getsize(filepath)
+#             file_sizes[relative_path].append((filename, size))
+#             print(relative_path,filename,size)
+#     print(file_sizes)
+#     return file_sizes
 
 def convert_size(size_in_bytes):
     # Convert sizes to kilobytes, megabytes, etc.
@@ -57,9 +90,9 @@ def create_legend(ax, subdirectory_colors, file_sizes):
             subdirectory, _ = os.path.split(relative_path.replace('\\', '/'))  # Replace backslashes with forward slashes
             legend_patches.append(Patch(color=subdirectory_colors[subdirectory], label=f"{relative_path} - {file} ({convert_size(size)})"))
             count+=1
-        # if count>40:
-            # print("Legend truncated due to size limit.")
-            # break
+        if count>40:
+            print("Legend truncated due to size limit.")
+            break
     ax.legend(handles=legend_patches, loc='upper left', bbox_to_anchor=(1, 1), title="Legend", fontsize='small')
 
 def plot_treemap(file_sizes):
@@ -102,8 +135,9 @@ def plot_treemap(file_sizes):
 
 def main():
     directory = input("Enter the path of the directory: ")
-    file_sizes = get_file_sizes(directory)
-
+    # get_file_sizes(directory)
+    file_sizes = get_folder_sizes(directory)
+    # file_sizes = get_file_sizes(directory)
     # Print file information in the terminal
     print_file_info(file_sizes)
 
