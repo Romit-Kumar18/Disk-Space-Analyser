@@ -6,14 +6,11 @@ import threading
 from collections import defaultdict
 from matplotlib.patches import Patch
 
-def get_file_size(path):
-    return os.path.getsize(path)
-
 def traverse_folder(root_path,path, result_dict):
     for root, dirs, files in os.walk(path):
         for file in files:
             file_path = os.path.join(root, file)
-            size = get_file_size(file_path)
+            size = os.path.getsize(file_path)
             relative_path = os.path.relpath(file_path, root_path)
             result_dict[relative_path].append((file,size))
 
