@@ -25,10 +25,27 @@ def get_folder_sizes(path):
             thread = threading.Thread(target=worker, args=(folder_path,))
             threads.append(thread)
             thread.start()
+    worker(path)
     for thread in threads:
         thread.join()
     sorted_result_dict = dict(sorted(result_dict.items(), key=lambda item: os.path.split(item[0].replace('\\', '/'))[0].split('/')[0]))
     return sorted_result_dict
+
+# def get_folder_sizes(path):
+#     result_dict = defaultdict(list)
+#     def worker(folder):
+#         traverse_folder(path, folder, result_dict)
+#     threads = []
+#     for root, dirs, files in os.walk(path):
+#         for dir in dirs:
+#             folder_path = os.path.join(root, dir)
+#             thread = threading.Thread(target=worker, args=(folder_path,))
+#             threads.append(thread)
+#             thread.start()
+#     for thread in threads:
+#         thread.join()
+#     sorted_result_dict = dict(sorted(result_dict.items(), key=lambda item: os.path.split(item[0].replace('\\', '/'))[0].split('/')[0]))
+#     return sorted_result_dict
 
 def convert_size(size_in_bytes):
     for unit in ['B', 'KB', 'MB', 'GB']:
